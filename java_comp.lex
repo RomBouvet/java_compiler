@@ -21,6 +21,7 @@ LETTRECHIFFRE		({LETTRE}|{CHIFFRE})
 "public"			{return PUBLIC;}
 "static"			{return STATIC;}
 "private"			{return PRIVATE;}
+"protected"			{return PROTECTED;}
 "double"			{return DOUBLE;}
 "true"				{return TRUE;}
 "false"				{return FALSE;}

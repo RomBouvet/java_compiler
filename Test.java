@@ -1,5 +1,5 @@
 public class Test {
-    public static void main ( String [] args ) {
+    public static void main(String[] args){
         int a,b;
         int c;
         a=3;
@@ -9,6 +9,6 @@ public class Test {
             c = a+c;
         }
 
-        System .out. println ( " c = " +c) ;
+        System.out.println("c="+c) ;
     }
 }

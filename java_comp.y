@@ -12,7 +12,7 @@
 	void yyerror(char *s);
 %}
 
-%token IF ELSE WHILE FOR CLASS SOP EXTENDS PUBLIC CHAINE PRIVATE RETURN STATIC TRUE FALSE INT DOUBLE BOOL FLOAT CHAR DO MAIN VOID STRING NOMBRE NOMVARIABLE
+%token IF ELSE WHILE FOR CLASS SOP EXTENDS PUBLIC CHAINE PRIVATE PROTECTED RETURN STATIC TRUE FALSE INT DOUBLE BOOL FLOAT CHAR DO MAIN VOID STRING NOMBRE NOMVARIABLE
 %right '=' 
 %left '{' '[' '-' '*' '+' ET '.' '!' 
 %nonassoc '<' '>'
@@ -21,49 +21,52 @@
 
 %%
 	Programme
-		: Classes ClassePrincipale { printf("Programme OK!\n");} Classes
+		: Class { printf("Programme OK!\n");}
 	;
 
-	ClassePrincipale 
-		: PUBLIC CLASS NOMVARIABLE '{' PUBLIC STATIC VOID MAIN '(' STRING '[' ']' NOMVARIABLE ')' '{' DeclarationVariables Instructions '}' '}'
-	;
-	Classes
-		: Classe Classes
-		| /**/
-	;
-	Classe
-		: CLASS NOMVARIABLE '{' DeclarationVariables Instructions DeclarationFonctions Instructions'}'
-		| CLASS NOMVARIABLE '{' DeclarationFonctions Instructions '}'
-		| CLASS NOMVARIABLE EXTENDS NOMVARIABLE '{' DeclarationVariables Instructions DeclarationFonctions Instructions '}'
-		| CLASS NOMVARIABLE EXTENDS NOMVARIABLE '{' Instructions DeclarationFonctions Instructions'}'
+	Class
+		: ClassPrototype '{' Mode STATIC VOID MAIN '(' STRING '[' ']' NOMVARIABLE ')' '{' VariableDeclarations Instructions '}' '}'
 	;
 
-	DeclarationVariables
-		: DeclarationVariable DeclarationVariables
-		| /**/
+	ClassPrototype
+		: Mode CLASS NOMVARIABLE
 	;
 
-	DeclarationVariable
+	Mode
+		: PUBLIC
+		| PRIVATE
+		| PROTECTED
+		| 
+	;
+
+	VariableDeclarations
+		: VariableDeclaration VariableDeclarations
+		| 
+	;
+
+	VariableDeclaration
 		: Type {for(i=0;i<strlen(yytext);i++){mesvariables[nbvars][i]=yytext[i];} nbvars++;} Variables ';' 
 	;
+
 	Variables
 		: NOMVARIABLE ',' Variables
 		| NOMVARIABLE
 	;
-	DeclarationFonctions
-		: DeclarationFonction DeclarationFonctions
-		| /**/
+
+	FunctionDeclarations
+		: FunctionDeclaration FunctionDeclarations
+		| 
 	;
 
-	DeclarationFonction
-		: PUBLIC Type NOMVARIABLE '(' Parametres ')' '{' DeclarationVariables Instructions RETURN Expression ';' '}'
-		| PUBLIC Type NOMVARIABLE '(' Parametres ')' '{' Instructions RETURN Expression ';' '}'
+	FunctionDeclaration
+		: Mode Type NOMVARIABLE '(' Parameters ')' '{' VariableDeclarations Instructions RETURN Expression ';' '}'
+		| Mode Type NOMVARIABLE '(' Parameters ')' '{' Instructions RETURN Expression ';' '}'
 	;
 
-	Parametres 
-		: Type NOMVARIABLE ',' Parametres
+	Parameters 
+		: Type NOMVARIABLE ',' Parameters
 		| Type NOMVARIABLE
-		| /**/
+		| 
 	;
 
 	Type
@@ -77,8 +80,9 @@
 
 	Instructions
 		: Instruction Instructions
-		| /**/
+		|
 	;
+
 	IncrementeDecremente
 		: NOMVARIABLE '+' '+'
 		| NOMVARIABLE '-' '-'
@@ -89,15 +93,15 @@
 
 	Instruction
 		: IF '(' Expression ')' '{' Instructions '}' ELSE '{' Instructions '}'
-		| DeclarationFonction
+		| FunctionDeclaration
 		| IncrementeDecremente ';'
-		| IF '(' Expression ')' '{' DeclarationVariables Instructions '}'
-		| WHILE '(' Expression ')' '{' DeclarationVariables Instructions '}'
+		| IF '(' Expression ')' '{' VariableDeclarations Instructions '}'
+		| WHILE '(' Expression ')' '{' VariableDeclarations Instructions '}'
     	| NOMVARIABLE '=' Expression ';'
     	| NOMVARIABLE '[' Expression ']' '=' Expression ';'
-    	| DO '{' DeclarationVariables Instructions '}' WHILE '(' Expression ')' ';'
-    	| FOR '(' Type NOMVARIABLE '=' Expression ';' Expression ';' Instruction ')' '{' DeclarationVariables Instructions '}' 
-    	| FOR '(' NOMVARIABLE '=' Expression ';' Expression ';' IncrementeDecremente ')' '{' DeclarationVariables Instructions '}' 
+    	| DO '{' VariableDeclarations Instructions '}' WHILE '(' Expression ')' ';'
+    	| FOR '(' Type NOMVARIABLE '=' Expression ';' Expression ';' Instruction ')' '{' VariableDeclarations Instructions '}' 
+    	| FOR '(' NOMVARIABLE '=' Expression ';' Expression ';' IncrementeDecremente ')' '{' VariableDeclarations Instructions '}' 
     	| SOP '(' Expression ')' ';'
     	| SOP '(' CHAINE '+' Expression')' ';'
     ;
@@ -105,7 +109,7 @@
     Expressions
     	: Expression
     	| Expression ',' Expressions
-    	| /**/
+    	| 
     ;
 
     Expression
@@ -122,7 +126,7 @@
     	|   TRUE
     	|   FALSE
     	|   NOMVARIABLE
-    	|	NOMVARIABLE '(' Parametres ')'
+    	|	NOMVARIABLE '(' Parameters ')'
     	|   '!' Expression
     	|   '(' Expression ')'
     ;   

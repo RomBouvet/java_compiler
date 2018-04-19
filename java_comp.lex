@@ -1,65 +1,75 @@
 %{
 	#include "y.tab.h"
-	extern int yylval;
+	#include <stdlib.h>
+	#include <string.h>
+
 	int nbLignes=1;
 	void yyerror(const char*s);	
 %}
 
-LETTRE 				[a-zA-Z]
-CHIFFRE 			[0-9]
-LETTRECHIFFRE		({LETTRE}|{CHIFFRE})
+digit 				[0-9]
+integer 			-?{digit}+
+real 				-?{integer}("."{integer})?
+number				{integer}|{real}
+letter 				[a-zA-Z]
+id 					{letter}({letter}|0-9_)*
+type 				"double"|"int"|"char"|"float"|"String"|"boolean"
+access				"public"|"private"|"protected"
+sop					"System.out.println"
+bool_vals			"true"|"false"
+comp_ops			"<"|">"|"<="|">="|"=="|"!="
+string 				\"(\\.|[^"\\])*\"
+main_prototype		{access}" static void main(String "{id}"[""]"")" 
+comments 			"//".*"\n"|"/*"(.|"\n")*"*/"
+whites 				[\t ]+
 
 %%
 
-"if" 				{return IF;}
-"do"				{return DO;}
-"else"				{return ELSE;}
-"while"				{return WHILE;}
-"for"				{return FOR;}
-"class"				{return CLASS;}
-"extends"			{return EXTENDS;}
-"public"			{return PUBLIC;}
-"static"			{return STATIC;}
-"private"			{return PRIVATE;}
-"protected"			{return PROTECTED;}
-"double"			{return DOUBLE;}
-"true"				{return TRUE;}
-"false"				{return FALSE;}
-"float"				{return FLOAT;}
-"int"				{return INT;}
-"return"			{return RETURN;}
-"char"				{return CHAR;}
-"boolean"			{return BOOL;}
-"main"				{return MAIN;}
-"void"				{return VOID;}
-"String"			{return STRING;}
-"&&"				{return ET;}
-"<"					{return '<';}
-">"					{return '>';}
-"+"					{return '+';}
-"-"					{return '-';}
-"."					{return '.';}
-"="					{return '=';}
-"*"					{return '*';}
-"!"					{return '!';}
-"("					{return '(';}
-")"					{return ')';}
-"{"					{return '{';}
-"}"					{return '}';}
-"["					{return '[';}
-"]"					{return ']';}
-","					{return ',';}
-";"					{return ';';}
+"if" 				return IF;
+"else"				return ELSE;
+"do"				return DO;
+"while"				return WHILE;
+"for"				return FOR;
+"class"				return CLASS;
+"extends"			return EXTENDS;
+"void"				return VOID;
+"&&"				return AND;
+"||"				return OR;
+"{"					return O_ACCOL;
+"}"					return C_ACCOL;
+"["					return O_BRACK;
+"]"					return C_BRACK;
+"("					return O_PAREN;
+")"					return C_PAREN;
+";"					return S_COLON;
+","					return COMA;
+"+"					return PLUS;
+"-"					return MINUS;
+"*"					return TIMES;
+"/"					return DIV;
+"="					return EQUAL;
+"!"					return NOT;
+"return"			return RETURN;	
+"static"			return STATIC;
 
-"//".*"\n"          {}
-"/*"(.|"\n")*"*/" 	{}
-"\"".*"\""			{return CHAINE;}
+{access}			return ACCESS;
+{sop}				return SOP;
+{bool_vals}			return BOOL_VALS;
+{number}			return NUMBER;
+{comp_ops}			return COMP_OPS;
+{main_prototype}	return MAIN_PROTOTYPE;
+{type}				strcpy(yylval.string,yytext); return TYPE;
+{id}				strcpy(yylval.string,yytext); return ID;
+{string}			return STRING;
 
-"System"".""out"".""println"		{return SOP;}
-{LETTRE}("_"|{LETTRECHIFFRE})*			{return NOMVARIABLE;}
-{CHIFFRE}+								{return NOMBRE;}
-\n 										{nbLignes++;}
+
+
+{comments}			{}
+{whites}			{}
+
+\n 					{nbLignes++;}
 . ;
+
 %%
 
 int yywrap(void){

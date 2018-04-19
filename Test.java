@@ -1,14 +1,31 @@
-public class Test {
-    public static void main(String[] args){
-        int a,b;
-        int c;
-        a=3;
-        c=0;
+public class Test extends BonneNote{
+    private int nb;
+    public String mot;
+    protected double pi;
+    boolean isConnected;
 
-        for (b=0;b<a;b++) {
-            c = a+c;
+    public int returnSum(int a,int b){
+        return a+b;
+    }
+
+    public void printSmtg(){
+        System.out.println("Smtg"+nb+mot+pi);
+    }
+
+    public static void main(String params[]){
+        int a,b;
+
+        for(a=0;a<=b;a++){
+            c=a+b;
+            System.out.println(b+"test"+c);
         }
 
-        System.out.println("c="+c) ;
+        if(a<b){
+            System.out.println("Hello");
+        }else if(b<a){
+            System.out.println("Goodbye");
+        }else{
+            System.out.println("...");
+        }
     }
 }

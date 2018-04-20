@@ -1,5 +1,5 @@
 public class Test extends BonneNote{
-    private int nb;
+    private int nb,more_nb;
     public String mot;
     protected double pi;
     boolean isConnected;
@@ -8,16 +8,17 @@ public class Test extends BonneNote{
         return a+b;
     }
 
-    public void printSmtg(){
+    public static void printSmtg(){
         System.out.println("Smtg"+nb+mot+pi);
     }
 
     public static void main(String params[]){
         int a,b;
+        String def;
 
         for(a=0;a<=b;a++){
-            c=a+b;
-            System.out.println(b+"test"+c);
+            a=a+b;
+            System.out.println(b+"test");
         }
 
         if(a<b){

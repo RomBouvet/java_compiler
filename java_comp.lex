@@ -12,14 +12,14 @@ integer 			-?{digit}+
 real 				-?{integer}("."{integer})?
 number				{integer}|{real}
 letter 				[a-zA-Z]
-id 					{letter}({letter}|0-9_)*
+id 					{letter}({letter}|{digit}|_)*
 type 				"double"|"int"|"char"|"float"|"String"|"boolean"
 access				"public"|"private"|"protected"
 sop					"System.out.println"
 bool_vals			"true"|"false"
 comp_ops			"<"|">"|"<="|">="|"=="|"!="
 string 				\"(\\.|[^"\\])*\"
-main_prototype		{access}" static void main(String "{id}"[""]"")" 
+main_prototype		(({access}" static void main(String "{id}"[""]"")")|({access}" static void main(String""[""] "{id}")"))
 comments 			"//".*"\n"|"/*"(.|"\n")*"*/"
 whites 				[\t ]+
 
@@ -44,6 +44,8 @@ whites 				[\t ]+
 ";"					return S_COLON;
 ","					return COMA;
 "+"					return PLUS;
+"++"				return INCREMENTE;
+"--"				return DECREMENTE;
 "-"					return MINUS;
 "*"					return TIMES;
 "/"					return DIV;

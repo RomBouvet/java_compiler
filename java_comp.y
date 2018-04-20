@@ -5,22 +5,24 @@
 	#include <string.h>
 	#include <stdarg.h>
 
-	#define MAX_TYPE 40
-	#define MAX_NAME 40
-	#define MAX_VARIABLES 100
-	#define MAX_FUNCTIONS 100
-	#define MAX_PARAMETERS 10
+	#define MAX_TYPE 40 // Nombre de caracteres maximals pour un type
+	#define MAX_NAME 40 // Nombre de caracteres maximals pour un nom
+	#define MAX_VARIABLES 100 // Nombre de variables maximal hors fonctions autorisees
+	#define MAX_FUNCTIONS 100 // Nombre de fonctions maximal
+	#define MAX_PARAMETERS 10 // Nombre de parametres maximal pour une fonction
 
 	extern int nbLignes;
 	extern char* yytext;
 	int yylex(void);
 	void yyerror(char *s);
 
+	// Structure contenant les informations neccessaires sur une variable : son nom et son type
 	typedef struct{
 		char type[MAX_TYPE];
 		char name[MAX_NAME];
 	}variable_t;
 
+	// Structure contenant les informations neccessaires sur une fonction : son nom, son type, son nombre de parametres et les parametres en question
 	typedef struct{
 		char type[MAX_TYPE];
 		char name[MAX_NAME];
@@ -28,15 +30,19 @@
 		variable_t params[MAX_PARAMETERS];
 	}function_t;
 
+	// Stockage des variables et des fonctions
 	variable_t variables[MAX_VARIABLES];
 	function_t functions[MAX_FUNCTIONS];
 
+	// Variables permettant de stocker et manipuler plus facilement les elements en question
 	variable_t last_variable; 
 	function_t last_function;
 	char tmp[40];
 
 	int var_nb=0,fct_nb=0,in_function=0;
 
+	// Ajoute une variable si la variable en question n'existe pas deja dans variables. 
+	// Si on est dans une fonction, on testera dans le tableau de parametres lie a cette fonction avant de l'y ajouter
 	int add_variable(char *name){
 		int i;
 		if(var_nb>=MAX_VARIABLES){
@@ -72,6 +78,7 @@
 		return 1;
 	}
 
+	// Ajoute une fonction si elle n'existe pas deja dans functions
 	int add_function(char *name){
 		int i;
 		if(fct_nb>=MAX_FUNCTIONS){
@@ -89,6 +96,8 @@
 		return 1;
 	}
 
+	// Verifie l'existence d'une variable
+	// Retourne 0 si la variable n'existe pas 1 sinon
 	int var_exist(char *name){
 		int i,j;
 		
@@ -112,6 +121,8 @@
 		return 0;
 	}
 
+	// Verifie l'existence d'une fonction
+	// Retourne 0 si la fonction n'existe pas 1 sinon 
 	int fct_exist(char *name){
 		int i;
 		for(i=0;i<fct_nb;i++){
@@ -122,6 +133,7 @@
 		return 0;
 	}
 
+	// Verifie l'existence d'un mot en tant que variable et fonction et affiche un message en cas d'erreur
 	int check_var(char *name){
 		//printf("Checking %s..\n",name);
 		if(!var_exist(name)){
@@ -133,6 +145,7 @@
 		return 1;
 	}
 
+	// Verifie si la variable donnee en parametre est bien correspondante aux parametres de la fonction
 	int check_params(char *name){
 		int i;
 		for(i=0;i<last_function.params_nb;i++){
@@ -143,6 +156,7 @@
 		return 0; 
 	}
 
+	// Recupere le type d'une variable
 	char* get_var_type(char *name){
 		int i,j;
 		if(!in_function){
@@ -164,6 +178,7 @@
 		
 	}
 
+	// Recupere le type d'une fonction
 	char* get_fct_type(char *name){
 		int i;
 		for(i=0;i<fct_nb;i++){
@@ -213,20 +228,24 @@
 		: Class {printf("Programme OK\n");}
 	;
 
+	// Classe definie par son prototype et son contenu
 	Class
 		: ClassPrototype O_ACCOL Declarations Main C_ACCOL
 	;
 
+	// Le prototype peut contenir la portee de la classe...
 	ClassPrototype
 		: ACCESS CLASS ID ClassInheritance
 		| CLASS ID ClassInheritance
 	;
 	
+	// .. et son heritage
 	ClassInheritance
 		: EXTENDS ID
 		|
 	;
 
+	// Les differents types de declaration : avec/sans portee static, void ou non etc.
 	Declarations
 		: ACCESS STATIC TYPE ID {
 			strcpy(last_variable.type,$3);
@@ -255,6 +274,7 @@
 		| 
 	;
 
+	// Une declaration peut etre une declaration de variable classique, une declaration de fonction ou encore une declaration suivie d'une initialisation
 	Declaration
 		: O_PAREN {
 			var_nb--;
@@ -268,6 +288,7 @@
 		| EQUAL Calcul VariableDeclarations
 	;
 
+	// Si c'est une declaration de variable, il est possible d'en declarer plusieurs d'affile
 	VariableDeclarations
 		: COMA ID {
 			strcpy(variables[var_nb].type,last_variable.type);
@@ -280,6 +301,7 @@
 		| S_COLON
 	;
 
+	// Les paramatres de prototype sont vides ou definissent leur type et leur nom
 	PrototypeParameters
 		: TYPE ID { 
 			strcpy(variables[var_nb].type,$1);
@@ -288,6 +310,7 @@
 		|
 	;
 
+	// Permet d'avoir la possibilite de meme plusieurs parametres
 	MultiplePrototypeParameters
 		: COMA TYPE ID {
 			if(!add_variable($3)) YYABORT;
@@ -295,6 +318,7 @@
 		|
 	;
 
+	// Les differentes instructions : if, calcul, assignation, boucles, affichage. La presence des points virgules est verifiee quand necessaire
 	Instructions
 		: IF O_PAREN Comparison C_PAREN O_ACCOL Instructions C_ACCOL Else
 		| Operation S_COLON Instructions
@@ -306,11 +330,13 @@
 		|
     ;
 
+	// Permet d'ajouter des conditions suite a un IF : des elseif et un else final
 	Else
 		: ELSE IF O_PAREN Comparison C_PAREN O_ACCOL Instructions C_ACCOL Else
 		| ELSE O_ACCOL Instructions C_ACCOL
 		|
 
+	// Une operation est soit un calcul (etant lie a une assignation) ou une incrementation/decrementation
 	Operation
 		: Calcul
 		| IncrementeDecremente
@@ -321,6 +347,7 @@
 		| ID DECREMENTE
 	;
 
+	// Calcul : operations entre chiffres, variables et fonctions
 	Calcul
 		: NUMBER {strcpy(tmp,"int");}
 		| ID O_PAREN Parameters C_PAREN {if(!check_var($1)) YYABORT;}
@@ -353,6 +380,7 @@
 		| ID PLUS {if(!check_var($1)) YYABORT;} Printable
 	;
 
+	// Permet de gerer les conditions tout en donnant la possibilite d'utiliser les operateurs logique ET et OU
 	Comparison
     	: Statement AND Comparison
 		| Statement OR Comparison
@@ -379,6 +407,7 @@
 
 	Main
 		: MAIN_PROTOTYPE O_ACCOL Declarations Instructions C_ACCOL
+		|
 	;
 
 %%
